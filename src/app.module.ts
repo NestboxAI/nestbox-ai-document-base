@@ -9,14 +9,14 @@ import { HttpExceptionFilter } from './core/exceptions/http.exception';
 @Global() // Make this module global so its providers are available throughout the app
 @Module({
     imports: [
-        TranslatorModule.forRoot({
-            defaultLang: 'en',
-            global: true,
-            requestKeyExtractor(req) {
-                return req.headers['locale'];
-            },
-            translationSource: './dist/i18n',
-        }),
+        // TranslatorModule.forRoot({
+        //     defaultLang: 'en',
+        //     global: true,
+        //     requestKeyExtractor(req) {
+        //         return req.headers['locale'];
+        //     },
+        //     translationSource: './dist/i18n',
+        // }),
         CollectionModule,
     ],
     controllers: [AppController],

@@ -1,6 +1,6 @@
 import { Body, Param, ParseIntPipe, Query } from '@nestjs/common';
 import CollectionService from './collection.service';
-import { ApiController, Delete, Get, Post, Put } from 'src/core/decorators';
+import { ApiController, Authorized, Delete, Get, Post, Put } from 'src/core/decorators';
 import { CreateCollectionRequestDTO } from './dto/request/createCollection.request';
 import { CreateDocumentRequestDTO } from './dto/request/createDoc.request';
 import { UpdateDocumentRequestDTO } from './dto/request/updateDoc.request';

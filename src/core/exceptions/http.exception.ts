@@ -26,7 +26,9 @@ function _prepareBadRequestValidationErrors(errors) {
 }
 @Catch(HttpException, Error)
 export class HttpExceptionFilter implements ExceptionFilter {
-    constructor(@Inject(TranslatorService) private _translatorService: TranslatorService) {}
+    constructor(
+        // @Inject(TranslatorService) private _translatorService: TranslatorService
+    ) {}
 
     catch(exception: HttpException | Error, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
@@ -35,7 +37,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         const locale = request.headers[LOCALE_HEADER_KEY] as string;
         if (!(exception instanceof HttpException)) {
             const ResponseToSend = {
-                message: this._translatorService.translate('errors.fatal', { lang: locale }),
+                // message: this._translatorService.translate('errors.fatal', { lang: locale }),
             };
             response.__ss_body = ResponseToSend;
             response.status(HttpStatus.INTERNAL_SERVER_ERROR).json(ResponseToSend);
@@ -49,25 +51,25 @@ export class HttpExceptionFilter implements ExceptionFilter {
             Array.isArray(exceptionResponse.message)
         ) {
             const ResponseToSend = {
-                message: this._translatorService.translate('errors.invalid_values', {
-                    replace: {
-                        values: exceptionResponse.message.map((x) => x.property).join(', '),
-                    },
-                    lang: locale,
-                }),
+                // message: this._translatorService.translate('errors.invalid_values', {
+                //     replace: {
+                //         values: exceptionResponse.message.map((x) => x.property).join(', '),
+                //     },
+                //     lang: locale,
+                // }),
                 errors: _prepareBadRequestValidationErrors(exceptionResponse.message),
             };
             response.__ss_body = ResponseToSend;
             response.status(status).json(ResponseToSend);
         } else {
             const ResponseToSend = {
-                message: this._translatorService.translate(
-                    exceptionResponse.key || 'errors.unindentified',
-                    {
-                        lang: locale,
-                        replace: exceptionResponse.data,
-                    },
-                ),
+                // message: this._translatorService.translate(
+                //     exceptionResponse.key || 'errors.unindentified',
+                //     {
+                //         lang: locale,
+                //         replace: exceptionResponse.data,
+                //     },
+                // ),
                 data: exceptionResponse?.data || undefined,
             };
             response.__ss_body = ResponseToSend;
