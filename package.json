@@ -8,7 +8,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "prebuild": "rimraf dist",
-    "prepare": "npm run build",
+    "prepack": "npm run build",
     "build": "nest build",
     "postbuild": "copyfiles -u 2 \"src/i18n/**/*.json\" \"dist/i18n/\"",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
