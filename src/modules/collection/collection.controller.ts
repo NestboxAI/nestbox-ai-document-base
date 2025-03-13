@@ -12,7 +12,7 @@ import MessageResponseDTO from './dto/response/message.response';
 export default class CollectionController {
     constructor(private _collectionService: CollectionService) {}
 
-
+    @Authorized()
     @Get({
         path: '/collections',
         description: 'List all collections',
@@ -22,6 +22,7 @@ export default class CollectionController {
         return await this._collectionService.getCollections();
     }
 
+    @Authorized()
     @Post({
         path: '/collections',
         description: 'Create a new collection',
@@ -33,6 +34,7 @@ export default class CollectionController {
         return await this._collectionService.createCollection(data);
     }
 
+    @Authorized()
     @Delete({
         path: '/collections/:collection_id',
         description: 'Delete a collection',
@@ -44,6 +46,7 @@ export default class CollectionController {
         return await this._collectionService.deleteCollection(collectionId);
     }
 
+    @Authorized()
     @Post({
         path: '/collections/:collection_id/docs',
         description: 'Add a new doc',
@@ -56,6 +59,7 @@ export default class CollectionController {
         return await this._collectionService.addDocToCollection(collectionId, data);
     }
 
+    @Authorized()
     @Delete({
         path: '/collections/:collection_id/docs',
         description: 'Delete docs based on metadata filter',
@@ -69,6 +73,7 @@ export default class CollectionController {
         return await this._collectionService.deleteDocsByMetadata(collectionId, { metadataFilter: parsedFilter });
     }
 
+    @Authorized()
     @Get({
         path: '/collections/:collection_id/docs/:doc_id',
         description: 'Retrieve doc by ID',
@@ -81,6 +86,7 @@ export default class CollectionController {
         return await this._collectionService.getDocById(collectionId, docId);
     }
 
+    @Authorized()
     @Put({
         path: '/collections/:collection_id/docs/:doc_id',
         description: 'Update or upsert doc',
@@ -94,6 +100,7 @@ export default class CollectionController {
         return await this._collectionService.updateDoc(collectionId, docId, data);
     }
 
+    @Authorized()
     @Delete({
         path: '/collections/:collection_id/docs/:doc_id',
         description: 'Delete doc by ID',
@@ -106,6 +113,7 @@ export default class CollectionController {
         return await this._collectionService.deleteDoc(collectionId, docId);
     }
 
+    @Authorized()
     @Post({
         path: '/collections/:collection_id/query',
         description: 'Similarity search query',

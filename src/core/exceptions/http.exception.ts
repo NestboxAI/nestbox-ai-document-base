@@ -5,12 +5,8 @@ import {
     HttpException,
     BadRequestException,
     HttpStatus,
-    Inject,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { TranslatorService } from 'nestjs-translator';
-
-const LOCALE_HEADER_KEY = 'locale';
 
 function _prepareBadRequestValidationErrors(errors) {
     const Errors: any = {};
@@ -26,51 +22,43 @@ function _prepareBadRequestValidationErrors(errors) {
 }
 @Catch(HttpException, Error)
 export class HttpExceptionFilter implements ExceptionFilter {
-    constructor(
-        // @Inject(TranslatorService) private _translatorService: TranslatorService
-    ) {}
-
     catch(exception: HttpException | Error, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
         const response: any = ctx.getResponse<Response>();
         const request = ctx.getRequest<Request>();
-        const locale = request.headers[LOCALE_HEADER_KEY] as string;
+        
         if (!(exception instanceof HttpException)) {
             const ResponseToSend = {
-                // message: this._translatorService.translate('errors.fatal', { lang: locale }),
+                message: 'Internal server error'
             };
             response.__ss_body = ResponseToSend;
             response.status(HttpStatus.INTERNAL_SERVER_ERROR).json(ResponseToSend);
             return;
         }
+        
         const status = exception.getStatus();
         const exceptionResponse: any = exception.getResponse();
+        
         if (
             exception instanceof BadRequestException &&
             exceptionResponse.message &&
             Array.isArray(exceptionResponse.message)
         ) {
+            const errorFields = exceptionResponse.message.map((x) => x.property).join(', ');
             const ResponseToSend = {
-                // message: this._translatorService.translate('errors.invalid_values', {
-                //     replace: {
-                //         values: exceptionResponse.message.map((x) => x.property).join(', '),
-                //     },
-                //     lang: locale,
-                // }),
-                errors: _prepareBadRequestValidationErrors(exceptionResponse.message),
+                message: `Invalid values provided: ${errorFields}`,
+                errors: _prepareBadRequestValidationErrors(exceptionResponse.message)
             };
             response.__ss_body = ResponseToSend;
             response.status(status).json(ResponseToSend);
         } else {
+            // Check if the exception has a message property directly
+            const message = exceptionResponse.message || 
+                           (typeof exceptionResponse === 'object' ? 'An error occurred' : exceptionResponse);
+            
             const ResponseToSend = {
-                // message: this._translatorService.translate(
-                //     exceptionResponse.key || 'errors.unindentified',
-                //     {
-                //         lang: locale,
-                //         replace: exceptionResponse.data,
-                //     },
-                // ),
-                data: exceptionResponse?.data || undefined,
+                message: message,
+                ...(exceptionResponse.data && { data: exceptionResponse.data })
             };
             response.__ss_body = ResponseToSend;
             response.status(status).json(ResponseToSend);

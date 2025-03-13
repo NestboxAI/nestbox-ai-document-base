@@ -1,28 +1,22 @@
 import { Module, Global } from '@nestjs/common';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TranslatorModule } from 'nestjs-translator';
 import CollectionModule from './modules/collection/collection.module';
 import { HttpExceptionFilter } from './core/exceptions/http.exception';
+import AuthGuard from './modules/app/auth.guard';
 
-@Global() // Make this module global so its providers are available throughout the app
+@Global()
 @Module({
     imports: [
-        // TranslatorModule.forRoot({
-        //     defaultLang: 'en',
-        //     global: true,
-        //     requestKeyExtractor(req) {
-        //         return req.headers['locale'];
-        //     },
-        //     translationSource: './dist/i18n',
-        // }),
         CollectionModule,
     ],
     controllers: [AppController],
     providers: [
         AppService,
         { provide: APP_FILTER, useClass: HttpExceptionFilter },
+        { provide: APP_GUARD, useClass: AuthGuard },
     ],
     exports: [
         AppService,
