@@ -120,7 +120,7 @@ export default class CollectionService {
             collectionId,
             query,
             topK,
-            filter || {},
+            filter,
             include
         );
         
@@ -131,7 +131,7 @@ export default class CollectionService {
             count: results.length,
             searchParams: {
                 ...params,
-                filter: filter || {}
+                filter,
             }
         };
     }
