@@ -8,4 +8,4 @@ import CollectionController from './collection.controller';
     providers: [CollectionService],
     controllers: [CollectionController],
 })
-export default class CollectionModule {}
+export default class CollectionModule { }

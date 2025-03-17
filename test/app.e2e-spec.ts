@@ -6,13 +6,13 @@ import { setVectorHandler } from '../src/core/managers/vectorManager';
 import { setParserHandler } from '../src/core/managers/parserManager';
 import { MockVectorHandler } from './mock-vector-handler';
 import { MockParserHandler } from './mock-parser-handler';
+import AppConfig from 'src/configs/app.config';
 
 describe('App (e2e)', () => {
   let app: INestApplication;
   let mockVectorHandler: MockVectorHandler;
   let mockParserHandler: MockParserHandler;
-  // Add auth token variable - replace with your actual token value
-  const authToken = 'your-test-auth-token';
+  const authToken = AppConfig.APP.API_KEY;
 
   beforeAll(async () => {
     // Create and set mock handlers
@@ -33,19 +33,18 @@ describe('App (e2e)', () => {
     await app.close();
   });
 
-  // Basic health check test
-  it('/health (GET)', () => {
+  it('/ (GET)', () => {
     return request(app.getHttpServer())
-      .get('/health') // Or any basic endpoint your app has
-      .set('Authorization', `Bearer ${authToken}`) // Add auth header
-      .expect(200);
+      .get('/')
+      .expect(200)
+      .expect('Hello World!');
   });
 
   // Basic collections test to verify the API is working
   it('/collections (GET)', () => {
     return request(app.getHttpServer())
       .get('/collections')
-      .set('Authorization', `Bearer ${authToken}`) // Add auth header
+      .set('authorization', `${authToken}`) // Add auth header
       .expect(200)
       .expect((res) => {
         expect(Array.isArray(res.body)).toBe(true);

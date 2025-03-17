@@ -16,8 +16,6 @@ describe('Collection API (e2e)', () => {
   const authToken = AppConfig.APP.API_KEY; 
 
   beforeAll(async () => {
-    console.log("API Key available?", !!AppConfig.APP.API_KEY);
-    console.log("API Key value:", AppConfig.APP.API_KEY);
     // Create mock handlers
     mockVectorHandler = new MockVectorHandler();
     mockParserHandler = new MockParserHandler();
