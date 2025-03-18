@@ -87,7 +87,7 @@ export default class CollectionController {
 
   @Authorized()
   @Post({
-    path: '/collections/:collection_id/docs-chunks',
+    path: '/collections/:collection_id/docs/file',
     description: 'Use a file to chunk and add to collection',
     response: MessageResponseDTO,
   })

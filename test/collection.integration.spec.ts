@@ -120,9 +120,9 @@ describe('Collection API (e2e)', () => {
         });
     });
 
-    it('/collections/:collection_id/docs-chunks (POST) - should add a doc to collection', () => {
+    it('/collections/:collection_id/docs/file (POST) - should add a doc to collection', () => {
       return request(app.getHttpServer())
-        .post(`/collections/${testCollectionId}/docs-chunks`)
+        .post(`/collections/${testCollectionId}/docs/file`)
         .set('authorization', `${authToken}`) // Add auth header
         .send({
           url: 'https://example.com/test-document',
