@@ -5,28 +5,26 @@ import { UnAuthorizedException } from 'src/core/exceptions/response.exception';
 
 @Injectable()
 export default class ApiKeyAuthGuard implements CanActivate {
-    constructor(
-        private _reflector: Reflector,
-    ) {}
+  constructor(private _reflector: Reflector) {}
 
-    async canActivate(context: ExecutionContext): Promise<boolean> {
-        const request = context.switchToHttp().getRequest();
-        const requiredAuthorization = this._reflector.get<boolean>(
-            'authorization',
-            context.getHandler(),
-        );
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const requiredAuthorization = this._reflector.get<boolean>(
+      'authorization',
+      context.getHandler(),
+    );
 
-        if (requiredAuthorization) {
-            const apiKey = request.headers['authorization'];
-            const validApiKey = AppConfig.APP.API_KEY
-            
-            if (!apiKey || apiKey !== validApiKey) {
-                throw new UnAuthorizedException();
-            }
+    if (requiredAuthorization) {
+      const apiKey = request.headers['authorization'];
+      const validApiKey = AppConfig.APP.API_KEY;
 
-            request.isAuthorized = true;
-        }
+      if (!apiKey || apiKey !== validApiKey) {
+        throw new UnAuthorizedException();
+      }
 
-        return true;
+      request.isAuthorized = true;
     }
+
+    return true;
+  }
 }

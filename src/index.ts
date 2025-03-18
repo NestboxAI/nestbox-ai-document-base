@@ -8,10 +8,8 @@ import { setParserHandler } from 'src/core/managers/parserManager';
 
 export {
   bootstrap,
-  
   VectorHandler,
   ParseHandler,
-  
   setVectorHandler,
-  setParserHandler
+  setParserHandler,
 };

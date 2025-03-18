@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsUrl, IsObject, IsOptional } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsUrl,
+  IsObject,
+  IsOptional,
+} from 'class-validator';
 
 export class UpdateDocumentRequestDTO {
   @ApiProperty()

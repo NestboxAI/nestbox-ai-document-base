@@ -10,14 +10,14 @@ export async function bootstrap(): Promise<INestApplication> {
     rawBody: true,
     cors: true,
   });
-  
+
   InjectSwagger(app);
-  
+
   const port = AppConfig.APP.PORT || 3000;
   await app.listen(port);
-  
+
   console.log(`Nestbox AI Document API server started on port ${port}`);
-  
+
   return app;
 }
 

@@ -3,9 +3,9 @@ import CollectionService from './collection.service';
 import CollectionController from './collection.controller';
 
 @Module({
-    imports: [],
-    exports: [CollectionService],
-    providers: [CollectionService],
-    controllers: [CollectionController],
+  imports: [],
+  exports: [CollectionService],
+  providers: [CollectionService],
+  controllers: [CollectionController],
 })
-export default class CollectionModule { }
+export default class CollectionModule {}

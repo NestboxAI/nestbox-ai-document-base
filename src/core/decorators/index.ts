@@ -6,14 +6,14 @@ import { Get, Post, Put, Patch, Delete } from './routes.decorator';
 import { TrimString } from './string.decorator';
 
 export {
-    Authorized,
-    IgnoreResponseInterceptor,
-    CurrentUser,
-    ApiController,
-    Get,
-    Post,
-    Patch,
-    Put,
-    Delete,
-    TrimString,
+  Authorized,
+  IgnoreResponseInterceptor,
+  CurrentUser,
+  ApiController,
+  Get,
+  Post,
+  Patch,
+  Put,
+  Delete,
+  TrimString,
 };
