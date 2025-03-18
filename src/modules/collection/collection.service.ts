@@ -17,7 +17,8 @@ export default class CollectionService {
 
   async getCollections() {
     try {
-      return await getVectorHandler().listCollections();
+      const collections = await getVectorHandler().listCollections();
+      return { collections };
     } catch (error) {
       this.handleError(error, 'Failed to retrieve collections');
     }
@@ -29,10 +30,30 @@ export default class CollectionService {
         throw new BadRequestException('Collection name is required');
       }
 
-      await getVectorHandler().createCollection(body.name);
+      await getVectorHandler().createCollection(body.name, body.metadata);
       return { success: true, name: body.name };
     } catch (error) {
       this.handleError(error, `Failed to create collection "${body.name}"`);
+    }
+  }
+
+  async updateCollection(
+    collectionId: string,
+    body: CreateCollectionRequestDTO,
+  ) {
+    try {
+      if (!collectionId || !body.name) {
+        throw new BadRequestException('Collection name is required');
+      }
+
+      await getVectorHandler().updateCollection(
+        collectionId,
+        body.name,
+        body.metadata,
+      );
+      return { success: true, name: body.name };
+    } catch (error) {
+      this.handleError(error, `Failed to update collection "${body.name}"`);
     }
   }
 
@@ -46,6 +67,19 @@ export default class CollectionService {
       return { success: true, collectionId };
     } catch (error) {
       this.handleError(error, `Failed to delete collection "${collectionId}"`);
+    }
+  }
+
+  async getCollection(collectionId: string) {
+    try {
+      if (!collectionId) {
+        throw new BadRequestException('Collection ID is required');
+      }
+
+      const collection = await getVectorHandler().getCollection(collectionId);
+      return collection;
+    } catch (error) {
+      this.handleError(error, `Failed to get collection "${collectionId}"`);
     }
   }
 

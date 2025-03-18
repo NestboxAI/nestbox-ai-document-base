@@ -7,7 +7,7 @@ import { VectorHandler } from 'src/interface/vectorHandler';
 export class MockVectorHandler implements VectorHandler {
   // In-memory storage for collections and vectors
   private collections: Map<string, Map<string, any>> = new Map();
-  
+
   async createCollection(name: string): Promise<void> {
     if (this.collections.has(name)) {
       throw new Error(`Collection "${name}" already exists`);
@@ -26,9 +26,34 @@ export class MockVectorHandler implements VectorHandler {
     return Array.from(this.collections.keys());
   }
 
+  async updateCollection(
+    previousId: string,
+    collectionId: string,
+    metadata: Record<string, any>,
+  ): Promise<void> {
+    if (!this.collections.has(previousId)) {
+      throw new Error(`Collection "${previousId}" does not exist`);
+    }
+    console.log('Updating collection metadata:', metadata);
+    return;
+  }
+
+  async getCollection(collectionId: string): Promise<any> {
+    if (!this.collections.has(collectionId)) {
+      throw new Error(`Collection "${collectionId}" does not exist`);
+    }
+    return { name: collectionId, metadata: {} };
+  }
+
   async insertVector(
     collectionId: string,
-    data: { id?: string; document?: string; url?: string; type?: string; metadata?: object }
+    data: {
+      id?: string;
+      document?: string;
+      url?: string;
+      type?: string;
+      metadata?: object;
+    },
   ): Promise<string> {
     const collection = this.collections.get(collectionId);
     if (!collection) {
@@ -36,14 +61,15 @@ export class MockVectorHandler implements VectorHandler {
     }
 
     // Generate a random ID if not provided
-    const vectorId = data.id || `vec_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-    
+    const vectorId =
+      data.id || `vec_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+
     // Create a vector with an embedding (simplified for testing)
     const vector = {
       ...data,
       id: vectorId,
       embedding: [], // Simplified embedding for testing
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
 
     collection.set(vectorId, vector);
@@ -53,7 +79,7 @@ export class MockVectorHandler implements VectorHandler {
   async updateVector(
     collectionId: string,
     vectorId: string,
-    data: { document?: string; url?: string; type?: string; metadata?: object }
+    data: { document?: string; url?: string; type?: string; metadata?: object },
   ): Promise<void> {
     const collection = this.collections.get(collectionId);
     if (!collection) {
@@ -62,31 +88,41 @@ export class MockVectorHandler implements VectorHandler {
 
     const existingVector = collection.get(vectorId);
     if (!existingVector) {
-      throw new Error(`Vector "${vectorId}" not found in collection "${collectionId}"`);
+      throw new Error(
+        `Vector "${vectorId}" not found in collection "${collectionId}"`,
+      );
     }
 
     // Update the vector
     collection.set(vectorId, {
       ...existingVector,
       ...data,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     });
   }
 
-  async deleteVectorById(collectionId: string, vectorId: string): Promise<void> {
+  async deleteVectorById(
+    collectionId: string,
+    vectorId: string,
+  ): Promise<void> {
     const collection = this.collections.get(collectionId);
     if (!collection) {
       throw new Error(`Collection "${collectionId}" not found`);
     }
 
     if (!collection.has(vectorId)) {
-      throw new Error(`Vector "${vectorId}" not found in collection "${collectionId}"`);
+      throw new Error(
+        `Vector "${vectorId}" not found in collection "${collectionId}"`,
+      );
     }
 
     collection.delete(vectorId);
   }
 
-  async deleteVectorsByFilter(collectionId: string, filter: object): Promise<number> {
+  async deleteVectorsByFilter(
+    collectionId: string,
+    filter: object,
+  ): Promise<number> {
     const collection = this.collections.get(collectionId);
     if (!collection) {
       throw new Error(`Collection "${collectionId}" not found`);
@@ -94,7 +130,7 @@ export class MockVectorHandler implements VectorHandler {
 
     // Count vectors that match the filter
     let deletedCount = 0;
-    
+
     // Very simple filtering logic (enhance for more complex use cases)
     for (const [id, vector] of collection.entries()) {
       if (this.matchesFilter(vector, filter)) {
@@ -125,7 +161,7 @@ export class MockVectorHandler implements VectorHandler {
     query: string,
     topK: number = 10,
     filter: object = {},
-    include: string[] = []
+    include: string[] = [],
   ): Promise<any[]> {
     const collection = this.collections.get(collectionId);
     if (!collection) {
@@ -135,43 +171,42 @@ export class MockVectorHandler implements VectorHandler {
     // In a real implementation, this would perform vector similarity search
     // For testing, we'll do a simple string matching against the documents
     const results: any[] = [];
-    
+
     for (const vector of collection.values()) {
       // Skip if it doesn't match the filter
       if (!this.matchesFilter(vector, filter)) {
         continue;
       }
-      
+
       // Very simple "similarity" - check if query appears in document
       // In real implementation, this would be vector similarity calculation
-      const similarity = vector.document && 
-        typeof vector.document === 'string' && 
+      const similarity =
+        vector.document &&
+        typeof vector.document === 'string' &&
         vector.document.toLowerCase().includes(query.toLowerCase())
-        ? 0.9 // Arbitrary high score for matching
-        : 0.1; // Arbitrary low score for non-matching
-      
+          ? 0.9 // Arbitrary high score for matching
+          : 0.1; // Arbitrary low score for non-matching
+
       // Create result object
       const result: any = {
         id: vector.id,
-        score: similarity
+        score: similarity,
       };
-      
+
       // Include requested fields
       if (include.length === 0 || include.includes('document')) {
         result.document = vector.document;
       }
-      
+
       if (include.length === 0 || include.includes('metadata')) {
         result.metadata = vector.metadata;
       }
-      
+
       results.push(result);
     }
-    
+
     // Sort by score (highest first) and limit to topK
-    return results
-      .sort((a, b) => b.score - a.score)
-      .slice(0, topK);
+    return results.sort((a, b) => b.score - a.score).slice(0, topK);
   }
 
   // Helper method to check if a vector matches a filter
@@ -180,7 +215,7 @@ export class MockVectorHandler implements VectorHandler {
     if (!filter || Object.keys(filter).length === 0) {
       return true;
     }
-    
+
     // Simple filter matching logic
     for (const [key, value] of Object.entries(filter)) {
       // For metadata fields, check within the metadata object
@@ -193,7 +228,7 @@ export class MockVectorHandler implements VectorHandler {
         return false;
       }
     }
-    
+
     return true;
   }
 }

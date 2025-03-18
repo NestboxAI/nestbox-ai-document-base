@@ -49,6 +49,29 @@ export default class CollectionController {
   }
 
   @Authorized()
+  @Get({
+    path: '/collections/:collection_id',
+    description: 'Get a collection info',
+    response: MessageResponseDTO,
+  })
+  async getCollection(@Param('collection_id') collectionId: string) {
+    return await this._collectionService.getCollection(collectionId);
+  }
+
+  @Authorized()
+  @Put({
+    path: '/collections/:collection_id',
+    description: 'Updates a collection',
+    response: MessageResponseDTO,
+  })
+  async updateCollection(
+    @Param('collection_id') collectionId: string,
+    @Body() data: CreateCollectionRequestDTO,
+  ) {
+    return await this._collectionService.updateCollection(collectionId, data);
+  }
+
+  @Authorized()
   @Post({
     path: '/collections/:collection_id/docs',
     description: 'Add a new doc',

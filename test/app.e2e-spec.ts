@@ -47,7 +47,7 @@ describe('App (e2e)', () => {
       .set('authorization', `${authToken}`) // Add auth header
       .expect(200)
       .expect((res) => {
-        expect(Array.isArray(res.body)).toBe(true);
+        expect(res.body).toHaveProperty('collections');
       });
   });
 });

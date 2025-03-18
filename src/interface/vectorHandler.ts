@@ -1,10 +1,28 @@
 // Interface for handling vector operations within collections
 export interface VectorHandler {
   /**
+   * Retrieves a list of all collection identifiers.
+   * @returns Array of collection names or IDs.
+   */
+  listCollections(): Promise<string[]>;
+
+  /**
    * Creates a new vector collection.
    * @param name - Name of the collection to be created.
+   * @param metadata - Metadata associated with the collection.
    */
-  createCollection(name: string): Promise<void>;
+  createCollection(name: string, metadata: Record<string, any>): Promise<void>;
+
+  /**
+   * Updates a collection.
+   * @param collectionId - Rename of the collection
+   * @param metadata - Metadata associated with the collection.
+   */
+  updateCollection(
+    previousId: string,
+    collectionId: string,
+    metadata: Record<string, any>,
+  ): Promise<void>;
 
   /**
    * Deletes an existing vector collection by its ID.
@@ -13,10 +31,10 @@ export interface VectorHandler {
   deleteCollection(collectionId: string): Promise<void>;
 
   /**
-   * Retrieves a list of all collection identifiers.
-   * @returns Array of collection names or IDs.
+   * Get a collection info and metadata by its ID.
+   * @param collectionId - Unique identifier of the collection.
    */
-  listCollections(): Promise<string[]>;
+  getCollection(collectionId: string): Promise<any>;
 
   /**
    * Inserts a new vector into a specified collection.

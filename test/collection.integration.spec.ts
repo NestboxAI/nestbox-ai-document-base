@@ -13,7 +13,7 @@ describe('Collection API (e2e)', () => {
   let mockVectorHandler: MockVectorHandler;
   let mockParserHandler: MockParserHandler;
   // Authentication token - you'll need to adjust this based on your auth setup
-  const authToken = AppConfig.APP.API_KEY; 
+  const authToken = AppConfig.APP.API_KEY;
 
   beforeAll(async () => {
     // Create mock handlers
@@ -44,7 +44,7 @@ describe('Collection API (e2e)', () => {
       return request(app.getHttpServer())
         .post('/collections')
         .set('authorization', `${authToken}`) // Add auth header
-        .send({ name: 'test-collection' })
+        .send({ name: 'test-collection', metadata: { test: true } })
         .expect(201)
         .expect((res) => {
           expect(res.body).toHaveProperty('success', true);
@@ -59,8 +59,30 @@ describe('Collection API (e2e)', () => {
         .set('authorization', `${authToken}`) // Add auth header
         .expect(200)
         .expect((res) => {
-          expect(Array.isArray(res.body)).toBe(true);
-          expect(res.body).toContain('test-collection');
+          expect(res.body).toHaveProperty('collections');
+          expect(res.body.collections).toContain('test-collection');
+        });
+    });
+
+    it('/collections/test-collection (GET) - should get collection', () => {
+      return request(app.getHttpServer())
+        .get('/collections/test-collection')
+        .set('authorization', `${authToken}`) // Add auth header
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('name', 'test-collection');
+          expect(res.body).toHaveProperty('metadata');
+        });
+    });
+
+    it('/collections/test-collection (PUT) - should update collection', () => {
+      return request(app.getHttpServer())
+        .put('/collections/test-collection')
+        .send({ name: 'new-collection' })
+        .set('authorization', `${authToken}`) // Add auth header
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('success', true);
         });
     });
   });
@@ -73,11 +95,11 @@ describe('Collection API (e2e)', () => {
         .post(`/collections/${testCollectionId}/docs`)
         .set('authorization', `${authToken}`) // Add auth header
         .send({
-          id: "integration-test-doc",
+          id: 'integration-test-doc',
           document: 'This is a test document',
-          url: "https://example.com/integration-test",
+          url: 'https://example.com/integration-test',
           type: 'text',
-          metadata: { source: 'integration-test' }
+          metadata: { source: 'integration-test' },
         })
         .expect(201)
         .expect((res) => {
@@ -97,7 +119,10 @@ describe('Collection API (e2e)', () => {
           expect(res.body).toHaveProperty('id', testDocId);
           expect(res.body).toHaveProperty('document');
           expect(res.body).toHaveProperty('metadata');
-          expect(res.body.metadata).toHaveProperty('source', 'integration-test');
+          expect(res.body.metadata).toHaveProperty(
+            'source',
+            'integration-test',
+          );
         });
     });
 
@@ -108,44 +133,48 @@ describe('Collection API (e2e)', () => {
         .send({
           id: testDocId,
           document: 'This is an updated test document',
-          url: "https://example.com/updated-test",
+          url: 'https://example.com/updated-test',
           type: 'text',
-          metadata: { 
+          metadata: {
             source: 'integration-test',
-            updated: true 
-          }
+            updated: true,
+          },
         })
         .expect(200)
         .expect((res) => {
           expect(res.body).toHaveProperty('success', true);
           expect(res.body).toHaveProperty('id', testDocId);
           // Adjust expectation to account for [PARSED_TEXT] prefix added by the mock parser
-          expect(res.body.document).toContain('This is an updated test document');
+          expect(res.body.document).toContain(
+            'This is an updated test document',
+          );
           expect(res.body.metadata).toHaveProperty('updated', true);
         });
     });
 
     it('/collections/:collection_id/query (POST) - should perform similarity search', () => {
-      return request(app.getHttpServer())
-        .post(`/collections/${testCollectionId}/query`)
-        .set('authorization', `${authToken}`) // Add auth header
-        .send({
-          query: 'test document',
-          params: { topK: 5 },
-          filter: { 'metadata.source': 'integration-test' },
-          include: ['document', 'metadata']
-        })
-        // Updated to expect 201 since that's what your API is returning
-        .expect(201)
-        .expect((res) => {
-          expect(res.body).toHaveProperty('collectionId', testCollectionId);
-          expect(res.body).toHaveProperty('query', 'test document');
-          expect(res.body).toHaveProperty('results');
-          expect(Array.isArray(res.body.results)).toBe(true);
-          expect(res.body.results.length).toBeGreaterThan(0);
-          expect(res.body.results[0]).toHaveProperty('id');
-          expect(res.body.results[0]).toHaveProperty('score');
-        });
+      return (
+        request(app.getHttpServer())
+          .post(`/collections/${testCollectionId}/query`)
+          .set('authorization', `${authToken}`) // Add auth header
+          .send({
+            query: 'test document',
+            params: { topK: 5 },
+            filter: { 'metadata.source': 'integration-test' },
+            include: ['document', 'metadata'],
+          })
+          // Updated to expect 201 since that's what your API is returning
+          .expect(201)
+          .expect((res) => {
+            expect(res.body).toHaveProperty('collectionId', testCollectionId);
+            expect(res.body).toHaveProperty('query', 'test document');
+            expect(res.body).toHaveProperty('results');
+            expect(Array.isArray(res.body.results)).toBe(true);
+            expect(res.body.results.length).toBeGreaterThan(0);
+            expect(res.body.results[0]).toHaveProperty('id');
+            expect(res.body.results[0]).toHaveProperty('score');
+          })
+      );
     });
 
     it('/collections/:collection_id/docs/:doc_id (DELETE) - should delete a doc by ID', () => {
@@ -169,14 +198,14 @@ describe('Collection API (e2e)', () => {
         .post(`/collections/${testCollectionId}/docs`)
         .set('authorization', `${authToken}`) // Add auth header
         .send({
-          id: "filter-test-doc",
+          id: 'filter-test-doc',
           document: 'This document will be deleted by filter',
-          url: "https://example.com/filter-test",
+          url: 'https://example.com/filter-test',
           type: 'text',
-          metadata: { 
+          metadata: {
             source: 'filter-test',
-            deleteMe: true 
-          }
+            deleteMe: true,
+          },
         })
         .expect(201)
         .expect((res) => {
@@ -216,8 +245,8 @@ describe('Collection API (e2e)', () => {
         .set('authorization', `${authToken}`) // Add auth header
         .expect(200)
         .expect((res) => {
-          expect(Array.isArray(res.body)).toBe(true);
-          expect(res.body).not.toContain(testCollectionId);
+          expect(res.body).toHaveProperty('collections');
+          expect(res.body.collections).not.toContain(testCollectionId);
         });
     });
   });
@@ -244,7 +273,7 @@ describe('Collection API (e2e)', () => {
         .set('authorization', `${authToken}`) // Add auth header
         .send({
           // Missing document and type
-          metadata: { test: true }
+          metadata: { test: true },
         })
         .expect(400);
     });
