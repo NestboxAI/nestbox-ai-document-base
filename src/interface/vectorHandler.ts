@@ -42,8 +42,6 @@ export interface VectorHandler {
    * @param data - Vector data to insert.
    *   - id (optional): Unique identifier for the vector.
    *   - document (optional): Text content associated with the vector.
-   *   - url (optional): URL reference linked to the vector.
-   *   - type (optional): Type or category of the vector.
    *   - metadata (optional): Additional metadata associated with the vector.
    * @returns The ID of the newly inserted vector.
    */
@@ -52,11 +50,27 @@ export interface VectorHandler {
     data: {
       id?: string;
       document?: string;
-      url?: string;
-      type?: string;
       metadata?: object;
     },
   ): Promise<string>;
+
+  /**
+   * Inserts a batch of vectors into a specified collection.
+   * @param collectionId - ID of the collection.
+   * @param data - Vector data to insert.
+   *   - ids (optional): Unique identifiers for the vectors.
+   *   - documents (optional): Text content associated with the vectors.
+   *   - metadatas (optional): Additional metadatas associated with the vector.
+   * @returns The IDs of the newly inserted vectors.
+   */
+  batchInsertVectors(
+    collectionId: string,
+    data: {
+      ids?: string[];
+      documents?: string[];
+      metadatas?: object[];
+    },
+  ): Promise<string[]>;
 
   /**
    * Updates an existing vector within a collection.
@@ -71,7 +85,7 @@ export interface VectorHandler {
   updateVector(
     collectionId: string,
     vectorId: string,
-    data: { document?: string; url?: string; type?: string; metadata?: object },
+    data: { document?: string; metadata?: object },
   ): Promise<void>;
 
   /**

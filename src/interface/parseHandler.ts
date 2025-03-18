@@ -3,14 +3,14 @@ export interface ParseHandler {
   /**
    * Parses input data and returns the parsed result.
    * @param input - Data to be parsed.
-   *   - document (optional): Text content to be parsed.
-   *   - url (optional): URL of the resource to parse.
+   *   - url: URL of the resource to parse.
    *   - type: Type or format of the input data.
-   * @returns Parsed content as a string.
+   *   - options: options given to the parser
+   * @returns Parsed content as an array of docs to insert.
    */
   parse(input: {
-    document?: string;
-    url?: string;
+    url: string;
     type: string;
-  }): Promise<string>;
+    options?: Record<string, any>;
+  }): Promise<{ ids: string[]; documents: string[]; metadatas: object[] }>;
 }

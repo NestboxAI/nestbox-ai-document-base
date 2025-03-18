@@ -10,6 +10,7 @@ import {
   BadRequestException,
   NotFoundException,
 } from 'src/core/exceptions/response.exception';
+import { ChunkFileRequestDTO } from './dto/request/chunkFile.request';
 
 @Injectable()
 export default class CollectionService {
@@ -92,34 +93,15 @@ export default class CollectionService {
         throw new BadRequestException('Collection ID is required');
       }
 
-      if ((!data.document && !data.url) || !data.type) {
+      if (!data.document) {
         throw new BadRequestException(
           'Document or URL along with type is required',
         );
       }
 
-      let parsedContent = data.document;
-      if ((data.document || data.url) && data.type) {
-        try {
-          parsedContent = await getParserHandler().parse({
-            document: data.document,
-            url: data.url,
-            type: data.type,
-          });
-        } catch (parserError) {
-          throw new BadRequestException(
-            `Failed to parse document: ${parserError.message}`,
-          );
-        }
-
-        data.document = parsedContent;
-      }
-
       const docId = await getVectorHandler().insertVector(collectionId, {
         id: data.id,
         document: data.document,
-        url: data.url,
-        type: data.type,
         metadata: data.metadata,
       });
 
@@ -128,6 +110,48 @@ export default class CollectionService {
         collectionId,
         documentId: docId,
         ...data,
+      };
+    } catch (error) {
+      this.handleError(
+        error,
+        `Failed to add document to collection "${collectionId}"`,
+      );
+    }
+  }
+
+  async chunkFileToCollection(collectionId: string, data: ChunkFileRequestDTO) {
+    try {
+      if (!collectionId) {
+        throw new BadRequestException('Collection ID is required');
+      }
+
+      if (!data.url || !data.type) {
+        throw new BadRequestException('URL along with type is required');
+      }
+
+      let parsed = { ids: [], documents: [], metadatas: [] };
+      try {
+        parsed = await getParserHandler().parse({
+          url: data.url,
+          type: data.type,
+          options: data.options,
+        });
+      } catch (parserError) {
+        throw new BadRequestException(
+          `Failed to parse document: ${parserError.message}`,
+        );
+      }
+
+      await getVectorHandler().batchInsertVectors(collectionId, {
+        ids: parsed.ids,
+        documents: parsed.documents,
+        metadatas: parsed.metadatas,
+      });
+
+      return {
+        success: true,
+        collectionId,
+        ids: parsed.ids,
       };
     } catch (error) {
       this.handleError(
@@ -203,27 +227,8 @@ export default class CollectionService {
         throw new BadRequestException('Document ID is required');
       }
 
-      let parsedContent = data.document;
-      if ((data.document || data.url) && data.type) {
-        try {
-          parsedContent = await getParserHandler().parse({
-            document: data.document,
-            url: data.url,
-            type: data.type,
-          });
-        } catch (parserError) {
-          throw new BadRequestException(
-            `Failed to parse document: ${parserError.message}`,
-          );
-        }
-
-        data.document = parsedContent;
-      }
-
       await getVectorHandler().updateVector(collectionId, docId, {
         document: data.document,
-        url: data.url,
-        type: data.type,
         metadata: data.metadata,
       });
 

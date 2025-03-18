@@ -13,6 +13,7 @@ import { CreateDocumentRequestDTO } from './dto/request/createDoc.request';
 import { UpdateDocumentRequestDTO } from './dto/request/updateDoc.request';
 import { SimilaritySearchQueryDTO } from './dto/request/similaritySearchQuery.request';
 import MessageResponseDTO from './dto/response/message.response';
+import { ChunkFileRequestDTO } from './dto/request/chunkFile.request';
 
 @ApiController({ version: '1', tag: 'collection' })
 export default class CollectionController {
@@ -82,6 +83,22 @@ export default class CollectionController {
     @Body() data: CreateDocumentRequestDTO,
   ) {
     return await this._collectionService.addDocToCollection(collectionId, data);
+  }
+
+  @Authorized()
+  @Post({
+    path: '/collections/:collection_id/docs-chunks',
+    description: 'Use a file to chunk and add to collection',
+    response: MessageResponseDTO,
+  })
+  async chunkFileToCollection(
+    @Param('collection_id') collectionId: string,
+    @Body() data: ChunkFileRequestDTO,
+  ) {
+    return await this._collectionService.chunkFileToCollection(
+      collectionId,
+      data,
+    );
   }
 
   @Authorized()

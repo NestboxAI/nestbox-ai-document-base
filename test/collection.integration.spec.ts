@@ -75,10 +75,22 @@ describe('Collection API (e2e)', () => {
         });
     });
 
-    it('/collections/test-collection (PUT) - should update collection', () => {
+    it('/collections (POST) - should create a new test collection', () => {
       return request(app.getHttpServer())
-        .put('/collections/test-collection')
-        .send({ name: 'new-collection' })
+        .post('/collections')
+        .set('authorization', `${authToken}`) // Add auth header
+        .send({ name: 'new-test-collection', metadata: { test: true } })
+        .expect(201)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('success', true);
+          expect(res.body).toHaveProperty('name', 'new-test-collection');
+        });
+    });
+
+    it('/collections/new-test-collection (PUT) - should update collection', () => {
+      return request(app.getHttpServer())
+        .put('/collections/new-test-collection')
+        .send({ name: 'edited-test-collection' })
         .set('authorization', `${authToken}`) // Add auth header
         .expect(200)
         .expect((res) => {
@@ -97,8 +109,6 @@ describe('Collection API (e2e)', () => {
         .send({
           id: 'integration-test-doc',
           document: 'This is a test document',
-          url: 'https://example.com/integration-test',
-          type: 'text',
           metadata: { source: 'integration-test' },
         })
         .expect(201)
@@ -107,6 +117,23 @@ describe('Collection API (e2e)', () => {
           expect(res.body).toHaveProperty('collectionId', testCollectionId);
           expect(res.body).toHaveProperty('documentId');
           testDocId = res.body.documentId; // Store for later tests
+        });
+    });
+
+    it('/collections/:collection_id/docs-chunks (POST) - should add a doc to collection', () => {
+      return request(app.getHttpServer())
+        .post(`/collections/${testCollectionId}/docs-chunks`)
+        .set('authorization', `${authToken}`) // Add auth header
+        .send({
+          url: 'https://example.com/test-document',
+          type: 'html',
+          options: { source: 'integration-test' },
+        })
+        .expect(201)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('success', true);
+          expect(res.body).toHaveProperty('collectionId', testCollectionId);
+          expect(res.body).toHaveProperty('ids');
         });
     });
 
@@ -133,8 +160,6 @@ describe('Collection API (e2e)', () => {
         .send({
           id: testDocId,
           document: 'This is an updated test document',
-          url: 'https://example.com/updated-test',
-          type: 'text',
           metadata: {
             source: 'integration-test',
             updated: true,
@@ -200,8 +225,6 @@ describe('Collection API (e2e)', () => {
         .send({
           id: 'filter-test-doc',
           document: 'This document will be deleted by filter',
-          url: 'https://example.com/filter-test',
-          type: 'text',
           metadata: {
             source: 'filter-test',
             deleteMe: true,

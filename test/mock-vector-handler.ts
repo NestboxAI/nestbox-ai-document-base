@@ -31,10 +31,17 @@ export class MockVectorHandler implements VectorHandler {
     collectionId: string,
     metadata: Record<string, any>,
   ): Promise<void> {
-    if (!this.collections.has(previousId)) {
-      throw new Error(`Collection "${previousId}" does not exist`);
+    if (
+      !this.collections.has(previousId) ||
+      this.collections.has(collectionId)
+    ) {
+      throw new Error(
+        `Collection "${previousId}" does not exist or "${collectionId}" already exists`,
+      );
     }
-    console.log('Updating collection metadata:', metadata);
+    this.collections.set(collectionId, new Map());
+    this.collections.delete(previousId);
+    console.log(`Metadata edited: ${metadata}`);
     return;
   }
 
@@ -50,8 +57,6 @@ export class MockVectorHandler implements VectorHandler {
     data: {
       id?: string;
       document?: string;
-      url?: string;
-      type?: string;
       metadata?: object;
     },
   ): Promise<string> {
@@ -76,10 +81,31 @@ export class MockVectorHandler implements VectorHandler {
     return vectorId;
   }
 
+  async batchInsertVectors(
+    collectionId: string,
+    data: { ids?: string[]; documents?: string[]; metadatas?: object[] },
+  ): Promise<string[]> {
+    const collection = this.collections.get(collectionId);
+    if (!collection) {
+      throw new Error(`Collection "${collectionId}" not found`);
+    }
+
+    for (let i = 0; i < data.ids.length; i++) {
+      collection.set(data.ids[i], {
+        id: data.ids[i],
+        document: data.documents[i],
+        metadata: data.metadatas[i],
+        embedding: [], // Simplified embedding for testing
+        createdAt: new Date().toISOString(),
+      });
+    }
+    return data.ids;
+  }
+
   async updateVector(
     collectionId: string,
     vectorId: string,
-    data: { document?: string; url?: string; type?: string; metadata?: object },
+    data: { document?: string; metadata?: object },
   ): Promise<void> {
     const collection = this.collections.get(collectionId);
     if (!collection) {

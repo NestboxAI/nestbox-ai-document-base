@@ -9,10 +9,12 @@ import CollectionService from 'src/modules/collection/collection.service';
 import { CreateCollectionRequestDTO } from 'src/modules/collection/dto/request/createCollection.request';
 import { CreateDocumentRequestDTO } from 'src/modules/collection/dto/request/createDoc.request';
 import { SimilaritySearchQueryDTO } from 'src/modules/collection/dto/request/similaritySearchQuery.request';
+import { ChunkFileRequestDTO } from 'src/modules/collection/dto/request/chunkFile.request';
 
 // Mock implementations
 const mockVectorHandler = {
   createCollection: jest.fn(),
+  batchInsertVectors: jest.fn(),
   listCollections: jest.fn(),
   insertVector: jest.fn(),
   similaritySearch: jest.fn(),
@@ -143,33 +145,21 @@ describe('CollectionService', () => {
       const docDto = {
         id: undefined,
         document: 'test content',
-        url: undefined,
-        type: 'text',
         metadata: { source: 'test' },
       } as CreateDocumentRequestDTO;
-      const parsedContent = 'parsed test content';
       const newDocId = 'doc123';
 
-      mockParserHandler.parse.mockResolvedValue(parsedContent);
       mockVectorHandler.insertVector.mockResolvedValue(newDocId);
 
       // Act
       const result = await service.addDocToCollection(collectionId, docDto);
 
       // Assert
-      expect(mockParserHandler.parse).toHaveBeenCalledWith({
-        document: 'test content',
-        url: undefined,
-        type: 'text',
-      });
-
       expect(mockVectorHandler.insertVector).toHaveBeenCalledWith(
         collectionId,
         {
           id: undefined,
-          document: parsedContent,
-          url: undefined,
-          type: 'text',
+          document: 'test content',
           metadata: { source: 'test' },
         },
       );
@@ -178,9 +168,50 @@ describe('CollectionService', () => {
         success: true,
         collectionId,
         documentId: newDocId,
-        document: parsedContent,
-        type: 'text',
+        document: 'test content',
         metadata: { source: 'test' },
+      });
+    });
+
+    it('should chunk file to collection and return success', async () => {
+      // Arrange
+      const collectionId = 'col1';
+      // Explicitly include all properties
+      const chunkFileDto = {
+        url: 'https://example.com/file.txt',
+        type: 'text',
+        options: { source: 'web' },
+      } as ChunkFileRequestDTO;
+
+      const newDocIds = ['doc1', 'doc2'];
+
+      mockVectorHandler.batchInsertVectors.mockResolvedValue(newDocIds);
+      mockParserHandler.parse.mockResolvedValue({
+        ids: newDocIds,
+        documents: ['doc1 content', 'doc2 content'],
+        metadatas: [{}, {}],
+      });
+
+      // Act
+      const result = await service.chunkFileToCollection(
+        collectionId,
+        chunkFileDto,
+      );
+
+      // Assert
+      expect(mockVectorHandler.batchInsertVectors).toHaveBeenCalledWith(
+        collectionId,
+        {
+          ids: newDocIds,
+          documents: ['doc1 content', 'doc2 content'],
+          metadatas: [{}, {}],
+        },
+      );
+
+      expect(result).toEqual({
+        success: true,
+        collectionId,
+        ids: newDocIds,
       });
     });
 
@@ -190,8 +221,6 @@ describe('CollectionService', () => {
       const docDto: CreateDocumentRequestDTO = {
         id: undefined,
         document: 'test content',
-        url: undefined,
-        type: 'text',
         metadata: { source: 'test' },
       };
 
@@ -221,21 +250,14 @@ describe('CollectionService', () => {
       const collectionId = 'col1';
       const docDto: CreateDocumentRequestDTO = {
         id: undefined,
-        document: 'test content',
-        url: undefined,
-        type: 'text',
+        document: undefined,
         metadata: { source: 'test' },
       };
-
-      mockParserHandler.parse.mockRejectedValue(
-        new Error('Invalid document format'),
-      );
 
       // Act & Assert
       await expect(
         service.addDocToCollection(collectionId, docDto),
       ).rejects.toThrow(BadRequestException);
-      expect(mockParserHandler.parse).toHaveBeenCalled();
       expect(mockVectorHandler.insertVector).not.toHaveBeenCalled();
     });
   });

@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import CollectionController from 'src/modules/collection/collection.controller';
 import CollectionService from 'src/modules/collection/collection.service';
+import { ChunkFileRequestDTO } from 'src/modules/collection/dto/request/chunkFile.request';
 import { CreateCollectionRequestDTO } from 'src/modules/collection/dto/request/createCollection.request';
 import { CreateDocumentRequestDTO } from 'src/modules/collection/dto/request/createDoc.request';
 import { SimilaritySearchQueryDTO } from 'src/modules/collection/dto/request/similaritySearchQuery.request';
@@ -8,6 +9,7 @@ import { SimilaritySearchQueryDTO } from 'src/modules/collection/dto/request/sim
 // Create mock for CollectionService
 const mockCollectionService = {
   getCollections: jest.fn(),
+  chunkFileToCollection: jest.fn(),
   createCollection: jest.fn(),
   deleteCollection: jest.fn(),
   addDocToCollection: jest.fn(),
@@ -86,8 +88,6 @@ describe('CollectionController', () => {
       const docDto = {
         id: 'test-doc-id',
         document: 'test content',
-        url: 'https://example.com/test',
-        type: 'text',
         metadata: { source: 'test' },
       } as CreateDocumentRequestDTO;
 
@@ -96,7 +96,6 @@ describe('CollectionController', () => {
         collectionId,
         documentId: 'doc123',
         document: 'parsed test content',
-        type: 'text',
         metadata: { source: 'test' },
       };
 
@@ -111,6 +110,42 @@ describe('CollectionController', () => {
       expect(mockCollectionService.addDocToCollection).toHaveBeenCalledWith(
         collectionId,
         docDto,
+      );
+      expect(result).toEqual(expectedResponse);
+    });
+  });
+
+  describe('chunkFileToCollection', () => {
+    it('should add documents from file to collection and return success response', async () => {
+      // Arrange
+      const collectionId = 'col1';
+      // Include all properties explicitly
+      const chunkFileDto = {
+        url: 'https://example.com/file.txt',
+        type: 'text',
+        options: { chunkSize: 1000 },
+      } as ChunkFileRequestDTO;
+
+      const expectedResponse = {
+        success: true,
+        collectionId,
+        ids: ['doc1', 'doc2'],
+      };
+
+      mockCollectionService.chunkFileToCollection.mockResolvedValue(
+        expectedResponse,
+      );
+
+      // Act
+      const result = await controller.chunkFileToCollection(
+        collectionId,
+        chunkFileDto,
+      );
+
+      // Assert
+      expect(mockCollectionService.chunkFileToCollection).toHaveBeenCalledWith(
+        collectionId,
+        chunkFileDto,
       );
       expect(result).toEqual(expectedResponse);
     });
