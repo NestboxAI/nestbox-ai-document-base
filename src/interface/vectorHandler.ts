@@ -58,7 +58,7 @@ export interface VectorHandler {
    * Inserts a batch of vectors into a specified collection.
    * @param collectionId - ID of the collection.
    * @param data - Vector data to insert.
-   *   - ids (optional): Unique identifiers for the vectors.
+   *   - ids: Unique identifiers for the vectors.
    *   - documents (optional): Text content associated with the vectors.
    *   - metadatas (optional): Additional metadatas associated with the vector.
    * @returns The IDs of the newly inserted vectors.
@@ -66,7 +66,7 @@ export interface VectorHandler {
   batchInsertVectors(
     collectionId: string,
     data: {
-      ids?: string[];
+      ids: string[];
       documents?: string[];
       metadatas?: object[];
     },
