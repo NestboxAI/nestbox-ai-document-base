@@ -1,4 +1,4 @@
-import { ParseHandler } from "src/interface/parseHandler";
+import { ParseHandler } from '../../interface/parseHandler';
 
 let parserHandler: ParseHandler | null = null;
 

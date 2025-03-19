@@ -3,8 +3,8 @@ import { bootstrap } from './main';
 import { VectorHandler } from './interface/vectorHandler';
 import { ParseHandler } from './interface/parseHandler';
 
-import { setVectorHandler } from 'src/core/managers/vectorManager';
-import { setParserHandler } from 'src/core/managers/parserManager';
+import { setVectorHandler } from './core/managers/vectorManager';
+import { setParserHandler } from './core/managers/parserManager';
 
 export {
   bootstrap,

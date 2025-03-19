@@ -1,4 +1,4 @@
-import { VectorHandler } from "src/interface/vectorHandler";
+import { VectorHandler } from '../../interface/vectorHandler';
 
 let vectorHandler: VectorHandler | null = null;
 
